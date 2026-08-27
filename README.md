@@ -44,9 +44,9 @@ Narrative-Forge/
 ├── src/                       # Shared application logic
 └── pnpm-workspace.yaml
 ```
-#Technology Stack
+# Technology Stack
 
-##Layer	Technology
+## Layer	Technology
 
 Package manager	pnpm workspaces
 Runtime	Node.js 24
@@ -67,7 +67,7 @@ Build tooling	Vite + esbuild
 
 ---
 
-#🚀 Getting Started
+# 🚀 Getting Started
 
 Requirements
 
@@ -100,7 +100,7 @@ DATABASE_URL=your_postgresql_connection_string
 
 ---
 
-#▶️ Running the Project
+# ▶️ Running the Project
 
 Development API
 
@@ -137,7 +137,7 @@ pnpm --filter @workspace/db run push
 
 ---
 
-##📂 Important Locations
+## 📂 Important Locations
 
 Frontend
 
@@ -172,7 +172,7 @@ Contains Narrative Forge's theme tokens and workspace styling utilities.
 
 ---
 
-#🔌 API
+# 🔌 API
 
 The current narrative API provides endpoints for:
 
@@ -194,7 +194,7 @@ Runtime data is validated using generated Zod schemas.
 
 ---
 
-#🧠 Design Philosophy
+# 🧠 Design Philosophy
 
 Narrative Forge is built around a simple idea:
 
@@ -227,7 +227,7 @@ Narrative Forge is designed to grow from its current vertical slice into a compl
 
 ---
 
-#📖 Example Project
+# 📖 Example Project
 
 The repository includes a seeded example project:
 
@@ -261,7 +261,7 @@ This allows the workspace to be explored without having to create an entire proj
 
 ---
 
-#🧪 Project Status
+# 🧪 Project Status
 
 Narrative Forge currently represents a functional vertical slice of the larger narrative-development platform.
 
@@ -297,7 +297,7 @@ Additional narrative systems and deeper production workflows can continue to be 
 
 ---
 
-##🛠️ Development
+## 🛠️ Development
 
 A typical development workflow is:
 
@@ -320,7 +320,7 @@ pnpm --filter @workspace/api-spec run codegen
 
 ---
 
-#📜 License
+# 📜 License
 
 Narrative Forge is licensed under the Apache License 2.0.
 
@@ -331,7 +331,7 @@ Third-party dependencies, libraries, generated components, and other external as
 
 ---
 
-##👤 Author
+## 👤 Author
 
 Juan Gabriel Cardozo Benítez
 
@@ -340,7 +340,7 @@ Creator and maintainer of Narrative Forge.
 
 ---
 
-#🌌 Vision
+# 🌌 Vision
 
 Narrative Forge aims to become more than a writing tool.
 
