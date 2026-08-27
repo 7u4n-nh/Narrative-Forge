@@ -20,6 +20,10 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary Get the narrative workspace dashboard
  */
+export const GetDashboardQueryParams = zod.object({
+  "projectId": zod.coerce.string().optional()
+})
+
 export const GetDashboardResponse = zod.object({
   "project": zod.object({
   "id": zod.string(),
@@ -28,7 +32,8 @@ export const GetDashboardResponse = zod.object({
   "status": zod.string(),
   "progress": zod.number(),
   "description": zod.string(),
-  "updatedAt": zod.string()
+  "updatedAt": zod.string(),
+  "isExample": zod.boolean()
 }),
   "stats": zod.object({
   "characters": zod.number(),
@@ -54,8 +59,53 @@ export const GetDashboardResponse = zod.object({
 
 
 /**
+ * @summary List narrative projects
+ */
+export const ListProjectsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "genre": zod.string(),
+  "status": zod.string(),
+  "progress": zod.number(),
+  "description": zod.string(),
+  "updatedAt": zod.string(),
+  "isExample": zod.boolean()
+})
+export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
+
+
+/**
+ * @summary Create a narrative project
+ */
+
+
+
+
+export const CreateProjectBody = zod.object({
+  "name": zod.string().min(1),
+  "genre": zod.string().min(1),
+  "description": zod.string()
+})
+
+export const CreateProjectResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "genre": zod.string(),
+  "status": zod.string(),
+  "progress": zod.number(),
+  "description": zod.string(),
+  "updatedAt": zod.string(),
+  "isExample": zod.boolean()
+})
+
+
+/**
  * @summary List project characters
  */
+export const ListCharactersQueryParams = zod.object({
+  "projectId": zod.coerce.string().optional()
+})
+
 export const ListCharactersResponseItem = zod.object({
   "id": zod.string(),
   "name": zod.string(),
@@ -72,6 +122,10 @@ export const ListCharactersResponse = zod.array(ListCharactersResponseItem)
 /**
  * @summary Create a character
  */
+export const CreateCharacterQueryParams = zod.object({
+  "projectId": zod.coerce.string().optional()
+})
+
 
 
 
@@ -99,6 +153,10 @@ export const CreateCharacterResponse = zod.object({
 /**
  * @summary List story chapters
  */
+export const ListChaptersQueryParams = zod.object({
+  "projectId": zod.coerce.string().optional()
+})
+
 export const ListChaptersResponseItem = zod.object({
   "id": zod.string(),
   "number": zod.number(),
@@ -113,6 +171,10 @@ export const ListChaptersResponse = zod.array(ListChaptersResponseItem)
 /**
  * @summary List recent story scenes
  */
+export const ListScenesQueryParams = zod.object({
+  "projectId": zod.coerce.string().optional()
+})
+
 export const ListScenesResponseItem = zod.object({
   "id": zod.string(),
   "chapterId": zod.string(),

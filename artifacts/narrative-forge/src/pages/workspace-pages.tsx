@@ -45,6 +45,7 @@ import {
 } from '@workspace/api-client-react';
 import type { Character, CharacterInput } from '@workspace/api-client-react';
 import { EmptyState, ErrorState, LoadingBlock, SectionHeading, StatusPill } from '@/components/workspace-shell';
+import { useProjectWorkspace } from '@/components/project-workspace';
 
 function formatTime(value: string) {
   const date = new Date(value);
@@ -60,9 +61,10 @@ function DashboardSkeleton() {
 }
 
 export function DashboardPage() {
-  const dashboardQuery = useGetDashboard({ query: { queryKey: getGetDashboardQueryKey() } });
+  const { selectedProjectId } = useProjectWorkspace();
+  const dashboardQuery = useGetDashboard({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getGetDashboardQueryKey({ projectId: selectedProjectId }) } });
   const dashboard = dashboardQuery.data;
-  if (dashboardQuery.isLoading) return <DashboardSkeleton />;
+  if (dashboardQuery.isLoading || !selectedProjectId) return <DashboardSkeleton />;
   if (dashboardQuery.isError || !dashboard) return <ErrorState onRetry={() => dashboardQuery.refetch()} />;
 
   const { project, stats, health, activity } = dashboard;
@@ -90,6 +92,7 @@ export function DashboardPage() {
 
 function CharacterModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
+  const { selectedProjectId } = useProjectWorkspace();
   const createCharacter = useCreateCharacter();
   const [form, setForm] = useState<CharacterInput>({ name: '', role: '', description: '', arc: '', tags: [] });
   const [tagsText, setTagsText] = useState('');
@@ -97,9 +100,9 @@ function CharacterModal({ onClose }: { onClose: () => void }) {
   const update = (key: keyof CharacterInput, value: string) => setForm((current) => ({ ...current, [key]: value }));
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    createCharacter.mutate({ data: { ...form, tags: tagsText.split(',').map((tag) => tag.trim()).filter(Boolean) } }, {
+    createCharacter.mutate({ data: { ...form, tags: tagsText.split(',').map((tag) => tag.trim()).filter(Boolean) }, params: { projectId: selectedProjectId } }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListCharactersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListCharactersQueryKey({ projectId: selectedProjectId }) });
         setSaved(true);
         setTimeout(onClose, 850);
       },
@@ -113,7 +116,8 @@ function CharacterCard({ character, onSelect }: { character: Character; onSelect
 }
 
 export function CharactersPage() {
-  const charactersQuery = useListCharacters({ query: { queryKey: getListCharactersQueryKey() } });
+  const { selectedProjectId } = useProjectWorkspace();
+  const charactersQuery = useListCharacters({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListCharactersQueryKey({ projectId: selectedProjectId }) } });
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('All roles');
   const [showModal, setShowModal] = useState(false);
@@ -121,7 +125,7 @@ export function CharactersPage() {
   const characters = charactersQuery.data ?? [];
   const roles = ['All roles', ...Array.from(new Set(characters.map((character) => character.role))).filter(Boolean)];
   const filtered = characters.filter((character) => `${character.name} ${character.role} ${character.tags?.join(' ')}`.toLowerCase().includes(search.toLowerCase()) && (role === 'All roles' || character.role === role));
-  if (charactersQuery.isLoading) return <div className="space-y-6"><LoadingBlock className="h-8 w-60" /><LoadingBlock className="h-12 w-full" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><LoadingBlock className="h-44" /><LoadingBlock className="h-44" /><LoadingBlock className="h-44" /></div></div>;
+  if (charactersQuery.isLoading || !selectedProjectId) return <div className="space-y-6"><LoadingBlock className="h-8 w-60" /><LoadingBlock className="h-12 w-full" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><LoadingBlock className="h-44" /><LoadingBlock className="h-44" /><LoadingBlock className="h-44" /></div></div>;
   if (charactersQuery.isError) return <ErrorState onRetry={() => charactersQuery.refetch()} />;
   return <div className="space-y-6"><SectionHeading eyebrow="Cast / character database" title="The people make the pressure." description={`${characters.length} records in the cast. Search by name, role, or story thread.`} action={<button onClick={() => setShowModal(true)} data-testid="button-new-character" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2.5 text-xs font-bold text-[hsl(var(--primary-foreground))] shadow-[0_7px_18px_hsl(var(--primary)/.18)] hover:-translate-y-0.5"><Plus size={16} /> New character</button>} /><div className="flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} data-testid="input-character-search" placeholder="Search names, roles, tags..." className="workspace-input pl-9" /></div><div className="relative sm:w-48"><Filter size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /><select value={role} onChange={(event) => setRole(event.target.value)} data-testid="select-character-role" className="workspace-input appearance-none pl-9 pr-8">{roles.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /></div></div>{filtered.length === 0 ? <EmptyState icon={UsersRound} title={characters.length ? 'No one matches that search.' : 'The cast is waiting.'} detail={characters.length ? 'Try a different name, role, or tag.' : 'Start with the person who creates the first impossible choice.'} action={!characters.length ? <button onClick={() => setShowModal(true)} data-testid="button-empty-new-character" className="rounded-lg bg-[hsl(var(--foreground))] px-4 py-2.5 text-xs font-semibold text-[hsl(var(--background))]">Add first character</button> : undefined} /> : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map((character) => <CharacterCard key={character.id} character={character} onSelect={() => setSelected(character)} />)}</div>}{selected && <div className="fixed inset-0 z-50 flex justify-end bg-[hsl(var(--foreground)/.22)]" onClick={() => setSelected(null)}><aside onClick={(event) => event.stopPropagation()} className="h-full w-full max-w-md overflow-y-auto border-l border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-2xl sm:p-8"><div className="flex items-center justify-between"><span className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[hsl(var(--primary))]">Character dossier</span><button onClick={() => setSelected(null)} data-testid="button-close-character-detail" className="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"><X size={18} /></button></div><div className="mt-10 flex items-center gap-4"><div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--sidebar))] font-display text-xl font-semibold text-[hsl(var(--accent))]">{selected.initials || selected.name.slice(0, 2).toUpperCase()}</div><div><h2 data-testid="text-selected-character" className="font-display text-3xl font-semibold tracking-[-.04em]">{selected.name}</h2><p className="mt-1 text-sm text-[hsl(var(--primary))]">{selected.role}</p></div></div><div className="mt-9 space-y-7"><div><div className="mb-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[hsl(var(--muted-foreground))]">At a glance</div><p className="text-sm leading-7">{selected.description || 'No description has been written yet.'}</p></div><div className="rounded-xl bg-[hsl(var(--background))] p-4"><div className="mb-2 flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[hsl(var(--primary))]"><Sparkles size={12} /> Arc note</div><p className="text-sm leading-6 text-[hsl(var(--muted-foreground))]">{selected.arc || 'No arc note yet. What does this person refuse to see?'}</p></div><div><div className="mb-3 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[hsl(var(--muted-foreground))]">Story threads</div><div className="flex flex-wrap gap-2">{(selected.tags || []).map((tag) => <span key={tag} className="rounded-full border border-[hsl(var(--border))] px-2.5 py-1 text-[11px]">{tag}</span>)}</div></div></div></aside></div>}{showModal && <CharacterModal onClose={() => setShowModal(false)} />}</div>;
 }
@@ -131,8 +135,9 @@ function storyStatus(status: string) {
 }
 
 export function StoryPage() {
-  const chaptersQuery = useListChapters({ query: { queryKey: getListChaptersQueryKey() } });
-  const scenesQuery = useListScenes({ query: { queryKey: getListScenesQueryKey() } });
+  const { selectedProjectId } = useProjectWorkspace();
+  const chaptersQuery = useListChapters({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListChaptersQueryKey({ projectId: selectedProjectId }) } });
+  const scenesQuery = useListScenes({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListScenesQueryKey({ projectId: selectedProjectId }) } });
   const chapters = chaptersQuery.data ?? [];
   const scenes = scenesQuery.data ?? [];
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
@@ -144,8 +149,9 @@ export function StoryPage() {
 }
 
 export function TimelinePage() {
-  const chaptersQuery = useListChapters({ query: { queryKey: getListChaptersQueryKey() } });
-  const scenesQuery = useListScenes({ query: { queryKey: getListScenesQueryKey() } });
+  const { selectedProjectId } = useProjectWorkspace();
+  const chaptersQuery = useListChapters({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListChaptersQueryKey({ projectId: selectedProjectId }) } });
+  const scenesQuery = useListScenes({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListScenesQueryKey({ projectId: selectedProjectId }) } });
   const chapters = chaptersQuery.data ?? [];
   const scenes = scenesQuery.data ?? [];
   const [onlyDrafts, setOnlyDrafts] = useState(false);
@@ -156,8 +162,9 @@ export function TimelinePage() {
 }
 
 export function FlowchartPage() {
-  const scenesQuery = useListScenes({ query: { queryKey: getListScenesQueryKey() } });
-  const chaptersQuery = useListChapters({ query: { queryKey: getListChaptersQueryKey() } });
+  const { selectedProjectId } = useProjectWorkspace();
+  const scenesQuery = useListScenes({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListScenesQueryKey({ projectId: selectedProjectId }) } });
+  const chaptersQuery = useListChapters({ projectId: selectedProjectId }, { query: { enabled: !!selectedProjectId, queryKey: getListChaptersQueryKey({ projectId: selectedProjectId }) } });
   const scenes = scenesQuery.data ?? [];
   const chapters = chaptersQuery.data ?? [];
   if (scenesQuery.isLoading || chaptersQuery.isLoading) return <div className="space-y-5"><LoadingBlock className="h-8 w-64" /><LoadingBlock className="h-[560px]" /></div>;

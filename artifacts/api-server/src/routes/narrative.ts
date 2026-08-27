@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { count, eq } from "drizzle-orm";
+import { count, eq, isNull } from "drizzle-orm";
 import {
   db,
   projectsTable,
@@ -32,10 +32,12 @@ async function ensureSeeded() {
         status: "In development",
         progress: "68",
         description: "A branching mystery about memory, grief, and the city that refuses to forget.",
+        isExample: "true",
       });
       await db.insert(charactersTable).values([
         {
           id: "char-mara",
+          projectId,
           name: "Mara Voss",
           role: "Protagonist",
           initials: "MV",
@@ -45,6 +47,7 @@ async function ensureSeeded() {
         },
         {
           id: "char-eli",
+          projectId,
           name: "Elias Wren",
           role: "Deuteragonist",
           initials: "EW",
@@ -54,6 +57,7 @@ async function ensureSeeded() {
         },
         {
           id: "char-sable",
+          projectId,
           name: "Sable",
           role: "Unknown",
           initials: "SB",
@@ -63,6 +67,7 @@ async function ensureSeeded() {
         },
         {
           id: "char-juno",
+          projectId,
           name: "Juno Vale",
           role: "Supporting",
           initials: "JV",
@@ -74,6 +79,7 @@ async function ensureSeeded() {
       await db.insert(chaptersTable).values([
         {
           id: "chapter-1",
+          projectId,
           number: "1",
           title: "The Return",
           status: "Complete",
@@ -82,6 +88,7 @@ async function ensureSeeded() {
         },
         {
           id: "chapter-2",
+          projectId,
           number: "2",
           title: "The Static",
           status: "In progress",
@@ -90,6 +97,7 @@ async function ensureSeeded() {
         },
         {
           id: "chapter-3",
+          projectId,
           number: "3",
           title: "Under the Archive",
           status: "Outline",
@@ -101,6 +109,7 @@ async function ensureSeeded() {
         {
           id: "scene-18",
           chapterId: "chapter-2",
+          projectId,
           number: "18",
           title: "The Broadcast",
           location: "Mara's apartment",
@@ -111,6 +120,7 @@ async function ensureSeeded() {
         {
           id: "scene-17",
           chapterId: "chapter-2",
+          projectId,
           number: "17",
           title: "A Door Below",
           location: "Meridian Archive",
@@ -121,6 +131,7 @@ async function ensureSeeded() {
         {
           id: "scene-16",
           chapterId: "chapter-2",
+          projectId,
           number: "16",
           title: "Negative Space",
           location: "Old Quarter",
@@ -131,6 +142,7 @@ async function ensureSeeded() {
         {
           id: "scene-08",
           chapterId: "chapter-1",
+          projectId,
           number: "8",
           title: "The Handwriting",
           location: "Voss family house",
@@ -140,27 +152,85 @@ async function ensureSeeded() {
         },
       ]);
     })();
+  } else {
+    await seedPromise;
   }
-  await seedPromise;
+  const [demoProject] = await db.select({ id: projectsTable.id }).from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+  if (demoProject) {
+    await db.update(projectsTable).set({ isExample: "true" }).where(eq(projectsTable.id, projectId));
+    await Promise.all([
+      db.update(charactersTable).set({ projectId }).where(isNull(charactersTable.projectId)),
+      db.update(chaptersTable).set({ projectId }).where(isNull(chaptersTable.projectId)),
+      db.update(scenesTable).set({ projectId }).where(isNull(scenesTable.projectId)),
+    ]);
+  }
 }
 
 function iso(date: Date | null) {
   return (date ?? new Date()).toISOString();
 }
 
-router.get("/dashboard", async (_req, res) => {
+router.get("/projects", async (_req, res) => {
   await ensureSeeded();
-  const [project] = await db.select().from(projectsTable).limit(1);
+  const projects = await db.select().from(projectsTable);
+  res.json(projects.map((project) => ({
+    ...project,
+    progress: Number(project.progress),
+    isExample: project.isExample === "true",
+    updatedAt: iso(project.updatedAt),
+  })));
+});
+
+router.post("/projects", async (req, res) => {
+  await ensureSeeded();
+  const { name, genre, description } = req.body as {
+    name?: unknown;
+    genre?: unknown;
+    description?: unknown;
+  };
+  if (typeof name !== "string" || name.trim().length === 0 || typeof genre !== "string" || genre.trim().length === 0) {
+    res.status(400).json({ error: "Project name and genre are required." });
+    return;
+  }
+  const [project] = await db.insert(projectsTable).values({
+    id: `project-${crypto.randomUUID().slice(0, 8)}`,
+    name: name.trim(),
+    genre: genre.trim(),
+    status: "In development",
+    progress: "0",
+    description: typeof description === "string" ? description.trim() : "",
+    isExample: "false",
+  }).returning();
+  res.status(201).json({
+    ...project,
+    progress: Number(project.progress),
+    isExample: false,
+    updatedAt: iso(project.updatedAt),
+  });
+});
+
+router.get("/dashboard", async (req, res) => {
+  await ensureSeeded();
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
+  const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, requestedId)).limit(1);
+  if (!project) {
+    res.status(404).json({ error: "Project not found." });
+    return;
+  }
+  const projectFilter = eq(charactersTable.projectId, project.id);
+  const chapterFilter = eq(chaptersTable.projectId, project.id);
+  const sceneFilter = eq(scenesTable.projectId, project.id);
   const [characters, chapters, scenes, issues] = await Promise.all([
-    db.select({ value: count() }).from(charactersTable),
-    db.select({ value: count() }).from(chaptersTable),
-    db.select({ value: count() }).from(scenesTable),
+    db.select({ value: count() }).from(charactersTable).where(projectFilter),
+    db.select({ value: count() }).from(chaptersTable).where(chapterFilter),
+    db.select({ value: count() }).from(scenesTable).where(sceneFilter),
     Promise.resolve([{ value: 3 }]),
   ]);
   const data = {
     project: {
       ...project,
       progress: Number(project.progress),
+      isExample: project.isExample === "true",
       updatedAt: iso(project.updatedAt),
     },
     stats: {
@@ -179,19 +249,20 @@ router.get("/dashboard", async (_req, res) => {
       { label: "Branches", value: 79, color: "coral" },
       { label: "World rules", value: 91, color: "blue" },
     ],
-    activity: [
+    activity: project.id === projectId ? [
       { id: "activity-1", type: "scene", title: "The Broadcast", detail: "Scene 18 · Draft updated", timestamp: "12 min ago" },
       { id: "activity-2", type: "character", title: "Elias Wren", detail: "Arc notes edited", timestamp: "1 hr ago" },
       { id: "activity-3", type: "qa", title: "3 continuity issues", detail: "Narrative QA scan completed", timestamp: "Yesterday" },
       { id: "activity-4", type: "world", title: "Meridian Archive", detail: "Location added to canon", timestamp: "Yesterday" },
-    ],
+    ] : [],
   };
   res.json(GetDashboardResponse.parse(data));
 });
 
-router.get("/characters", async (_req, res) => {
+router.get("/characters", async (req, res) => {
   await ensureSeeded();
-  const rows = await db.select().from(charactersTable);
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
+  const rows = await db.select().from(charactersTable).where(eq(charactersTable.projectId, requestedId));
   res.json(ListCharactersResponse.parse(rows.map((character) => ({
     ...character,
     updatedAt: iso(character.updatedAt),
@@ -201,6 +272,7 @@ router.get("/characters", async (_req, res) => {
 router.post("/characters", async (req, res) => {
   await ensureSeeded();
   const input = CreateCharacterBody.parse(req.body);
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
   const id = `char-${crypto.randomUUID().slice(0, 8)}`;
   const initials = input.name
     .split(/\s+/)
@@ -210,6 +282,7 @@ router.post("/characters", async (req, res) => {
     .toUpperCase();
   const [created] = await db.insert(charactersTable).values({
     id,
+    projectId: requestedId,
     name: input.name,
     role: input.role,
     initials,
@@ -223,9 +296,10 @@ router.post("/characters", async (req, res) => {
   });
 });
 
-router.get("/chapters", async (_req, res) => {
+router.get("/chapters", async (req, res) => {
   await ensureSeeded();
-  const rows = await db.select().from(chaptersTable);
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
+  const rows = await db.select().from(chaptersTable).where(eq(chaptersTable.projectId, requestedId));
   res.json(ListChaptersResponse.parse(rows.map((chapter) => ({
     ...chapter,
     number: Number(chapter.number),
@@ -233,9 +307,10 @@ router.get("/chapters", async (_req, res) => {
   }))));
 });
 
-router.get("/scenes", async (_req, res) => {
+router.get("/scenes", async (req, res) => {
   await ensureSeeded();
-  const rows = await db.select().from(scenesTable);
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
+  const rows = await db.select().from(scenesTable).where(eq(scenesTable.projectId, requestedId));
   res.json(ListScenesResponse.parse(rows.map((scene) => ({
     ...scene,
     number: Number(scene.number),

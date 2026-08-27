@@ -6,13 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Project {
-  id: string;
+export interface ProjectInput {
+  /** @minLength 1 */
   name: string;
+  /** @minLength 1 */
   genre: string;
-  status: string;
-  progress: number;
   description: string;
-  updatedAt: string;
-  isExample: boolean;
 }

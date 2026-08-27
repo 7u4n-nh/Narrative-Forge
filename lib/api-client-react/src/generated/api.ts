@@ -23,8 +23,15 @@ import type {
   Chapter,
   Character,
   CharacterInput,
+  CreateCharacterParams,
   Dashboard,
+  GetDashboardParams,
   HealthStatus,
+  ListChaptersParams,
+  ListCharactersParams,
+  ListScenesParams,
+  Project,
+  ProjectInput,
   Scene
 } from './api.schemas';
 
@@ -133,20 +140,27 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
-export const getGetDashboardUrl = () => {
+export const getGetDashboardUrl = (params?: GetDashboardParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/dashboard`
+  return stringifiedParams.length > 0 ? `/api/dashboard?${stringifiedParams}` : `/api/dashboard`
 }
 
 /**
  * @summary Get the narrative workspace dashboard
  */
-export const getDashboard = async ( options?: Parameters<typeof customFetch>[1]): Promise<Dashboard> => {
+export const getDashboard = async (params?: GetDashboardParams, options?: Parameters<typeof customFetch>[1]): Promise<Dashboard> => {
 
-  return customFetch<Dashboard>(getGetDashboardUrl(),
+  return customFetch<Dashboard>(getGetDashboardUrl(params),
   {
     ...options,
     method: 'GET'
@@ -159,23 +173,23 @@ export const getDashboard = async ( options?: Parameters<typeof customFetch>[1])
 
 
 
-export const getGetDashboardQueryKey = () => {
+export const getGetDashboardQueryKey = (params?: GetDashboardParams,) => {
     return [
-    `/api/dashboard`
+    `/api/dashboard`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getDashboard>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getDashboard>>, TError = ErrorType<unknown>>(params?: GetDashboardParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetDashboardQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetDashboardQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboard>>> = ({ signal }) => getDashboard({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboard>>> = ({ signal }) => getDashboard(params, { signal, ...requestOptions });
 
 
 
@@ -193,11 +207,11 @@ export type GetDashboardQueryError = ErrorType<unknown>
  */
 
 export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetDashboardParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetDashboardQueryOptions(options)
+  const queryOptions = getGetDashboardQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -210,20 +224,20 @@ export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>
 
 
 
-export const getListCharactersUrl = () => {
+export const getListProjectsUrl = () => {
 
 
 
 
-  return `/api/characters`
+  return `/api/projects`
 }
 
 /**
- * @summary List project characters
+ * @summary List narrative projects
  */
-export const listCharacters = async ( options?: Parameters<typeof customFetch>[1]): Promise<Character[]> => {
+export const listProjects = async ( options?: Parameters<typeof customFetch>[1]): Promise<Project[]> => {
 
-  return customFetch<Character[]>(getListCharactersUrl(),
+  return customFetch<Project[]>(getListProjectsUrl(),
   {
     ...options,
     method: 'GET'
@@ -236,23 +250,178 @@ export const listCharacters = async ( options?: Parameters<typeof customFetch>[1
 
 
 
-export const getListCharactersQueryKey = () => {
+export const getListProjectsQueryKey = () => {
     return [
-    `/api/characters`
+    `/api/projects`
     ] as const;
     }
 
 
-export const getListCharactersQueryOptions = <TData = Awaited<ReturnType<typeof listCharacters>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCharacters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListProjectsQueryOptions = <TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListCharactersQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListProjectsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCharacters>>> = ({ signal }) => listCharacters({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProjects>>> = ({ signal }) => listProjects({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListProjectsQueryResult = NonNullable<Awaited<ReturnType<typeof listProjects>>>
+export type ListProjectsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List narrative projects
+ */
+
+export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListProjectsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateProjectUrl = () => {
+
+
+
+
+  return `/api/projects`
+}
+
+/**
+ * @summary Create a narrative project
+ */
+export const createProject = async (projectInput: ProjectInput, options?: Parameters<typeof customFetch>[1]): Promise<Project> => {
+
+  return customFetch<Project>(getCreateProjectUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(projectInput)
+  }
+);}
+
+
+
+
+
+export const getCreateProjectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProject>>, TError,{data: BodyType<ProjectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createProject>>, TError,{data: BodyType<ProjectInput>}, TContext> => {
+
+const mutationKey = ['createProject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProject>>, {data: BodyType<ProjectInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createProject(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProjectMutationResult = NonNullable<Awaited<ReturnType<typeof createProject>>>
+    export type CreateProjectMutationBody = BodyType<ProjectInput>
+    export type CreateProjectMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a narrative project
+ */
+export const useCreateProject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProject>>, TError,{data: BodyType<ProjectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createProject>>,
+        TError,
+        {data: BodyType<ProjectInput>},
+        TContext
+      > => {
+      return useMutation(getCreateProjectMutationOptions(options));
+    }
+
+export const getListCharactersUrl = (params?: ListCharactersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/characters?${stringifiedParams}` : `/api/characters`
+}
+
+/**
+ * @summary List project characters
+ */
+export const listCharacters = async (params?: ListCharactersParams, options?: Parameters<typeof customFetch>[1]): Promise<Character[]> => {
+
+  return customFetch<Character[]>(getListCharactersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCharactersQueryKey = (params?: ListCharactersParams,) => {
+    return [
+    `/api/characters`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListCharactersQueryOptions = <TData = Awaited<ReturnType<typeof listCharacters>>, TError = ErrorType<unknown>>(params?: ListCharactersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCharacters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCharactersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCharacters>>> = ({ signal }) => listCharacters(params, { signal, ...requestOptions });
 
 
 
@@ -270,11 +439,11 @@ export type ListCharactersQueryError = ErrorType<unknown>
  */
 
 export function useListCharacters<TData = Awaited<ReturnType<typeof listCharacters>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCharacters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: ListCharactersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCharacters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListCharactersQueryOptions(options)
+  const queryOptions = getListCharactersQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -287,20 +456,28 @@ export function useListCharacters<TData = Awaited<ReturnType<typeof listCharacte
 
 
 
-export const getCreateCharacterUrl = () => {
+export const getCreateCharacterUrl = (params?: CreateCharacterParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/characters`
+  return stringifiedParams.length > 0 ? `/api/characters?${stringifiedParams}` : `/api/characters`
 }
 
 /**
  * @summary Create a character
  */
-export const createCharacter = async (characterInput: CharacterInput, options?: Parameters<typeof customFetch>[1]): Promise<Character> => {
+export const createCharacter = async (characterInput: CharacterInput,
+    params?: CreateCharacterParams, options?: Parameters<typeof customFetch>[1]): Promise<Character> => {
 
-  return customFetch<Character>(getCreateCharacterUrl(),
+  return customFetch<Character>(getCreateCharacterUrl(params),
   {
     ...options,
     method: 'POST',
@@ -314,8 +491,8 @@ export const createCharacter = async (characterInput: CharacterInput, options?: 
 
 
 export const getCreateCharacterMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCharacter>>, TError,{data: BodyType<CharacterInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createCharacter>>, TError,{data: BodyType<CharacterInput>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCharacter>>, TError,{data: BodyType<CharacterInput>;params?: CreateCharacterParams}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCharacter>>, TError,{data: BodyType<CharacterInput>;params?: CreateCharacterParams}, TContext> => {
 
 const mutationKey = ['createCharacter'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -327,10 +504,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCharacter>>, {data: BodyType<CharacterInput>}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCharacter>>, {data: BodyType<CharacterInput>;params?: CreateCharacterParams}> = (props) => {
+          const {data,params} = props ?? {};
 
-          return  createCharacter(data,requestOptions)
+          return  createCharacter(data,params,requestOptions)
         }
 
 
@@ -348,30 +525,37 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Create a character
  */
 export const useCreateCharacter = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCharacter>>, TError,{data: BodyType<CharacterInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCharacter>>, TError,{data: BodyType<CharacterInput>;params?: CreateCharacterParams}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createCharacter>>,
         TError,
-        {data: BodyType<CharacterInput>},
+        {data: BodyType<CharacterInput>;params?: CreateCharacterParams},
         TContext
       > => {
       return useMutation(getCreateCharacterMutationOptions(options));
     }
 
-export const getListChaptersUrl = () => {
+export const getListChaptersUrl = (params?: ListChaptersParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/chapters`
+  return stringifiedParams.length > 0 ? `/api/chapters?${stringifiedParams}` : `/api/chapters`
 }
 
 /**
  * @summary List story chapters
  */
-export const listChapters = async ( options?: Parameters<typeof customFetch>[1]): Promise<Chapter[]> => {
+export const listChapters = async (params?: ListChaptersParams, options?: Parameters<typeof customFetch>[1]): Promise<Chapter[]> => {
 
-  return customFetch<Chapter[]>(getListChaptersUrl(),
+  return customFetch<Chapter[]>(getListChaptersUrl(params),
   {
     ...options,
     method: 'GET'
@@ -384,23 +568,23 @@ export const listChapters = async ( options?: Parameters<typeof customFetch>[1])
 
 
 
-export const getListChaptersQueryKey = () => {
+export const getListChaptersQueryKey = (params?: ListChaptersParams,) => {
     return [
-    `/api/chapters`
+    `/api/chapters`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListChaptersQueryOptions = <TData = Awaited<ReturnType<typeof listChapters>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListChaptersQueryOptions = <TData = Awaited<ReturnType<typeof listChapters>>, TError = ErrorType<unknown>>(params?: ListChaptersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListChaptersQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListChaptersQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChapters>>> = ({ signal }) => listChapters({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChapters>>> = ({ signal }) => listChapters(params, { signal, ...requestOptions });
 
 
 
@@ -418,11 +602,11 @@ export type ListChaptersQueryError = ErrorType<unknown>
  */
 
 export function useListChapters<TData = Awaited<ReturnType<typeof listChapters>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: ListChaptersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChapters>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListChaptersQueryOptions(options)
+  const queryOptions = getListChaptersQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -435,20 +619,27 @@ export function useListChapters<TData = Awaited<ReturnType<typeof listChapters>>
 
 
 
-export const getListScenesUrl = () => {
+export const getListScenesUrl = (params?: ListScenesParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/scenes`
+  return stringifiedParams.length > 0 ? `/api/scenes?${stringifiedParams}` : `/api/scenes`
 }
 
 /**
  * @summary List recent story scenes
  */
-export const listScenes = async ( options?: Parameters<typeof customFetch>[1]): Promise<Scene[]> => {
+export const listScenes = async (params?: ListScenesParams, options?: Parameters<typeof customFetch>[1]): Promise<Scene[]> => {
 
-  return customFetch<Scene[]>(getListScenesUrl(),
+  return customFetch<Scene[]>(getListScenesUrl(params),
   {
     ...options,
     method: 'GET'
@@ -461,23 +652,23 @@ export const listScenes = async ( options?: Parameters<typeof customFetch>[1]): 
 
 
 
-export const getListScenesQueryKey = () => {
+export const getListScenesQueryKey = (params?: ListScenesParams,) => {
     return [
-    `/api/scenes`
+    `/api/scenes`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getListScenesQueryOptions = <TData = Awaited<ReturnType<typeof listScenes>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listScenes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListScenesQueryOptions = <TData = Awaited<ReturnType<typeof listScenes>>, TError = ErrorType<unknown>>(params?: ListScenesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listScenes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListScenesQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListScenesQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listScenes>>> = ({ signal }) => listScenes({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listScenes>>> = ({ signal }) => listScenes(params, { signal, ...requestOptions });
 
 
 
@@ -495,11 +686,11 @@ export type ListScenesQueryError = ErrorType<unknown>
  */
 
 export function useListScenes<TData = Awaited<ReturnType<typeof listScenes>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listScenes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: ListScenesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listScenes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListScenesQueryOptions(options)
+  const queryOptions = getListScenesQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

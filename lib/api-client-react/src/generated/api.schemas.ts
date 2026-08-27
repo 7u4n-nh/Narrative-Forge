@@ -17,6 +17,15 @@ export interface Project {
   progress: number;
   description: string;
   updatedAt: string;
+  isExample: boolean;
+}
+
+export interface ProjectInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  genre: string;
+  description: string;
 }
 
 export interface HealthMetric {
@@ -90,4 +99,24 @@ export interface Scene {
   updatedAt: string;
   preview: string;
 }
+
+export type GetDashboardParams = {
+projectId?: string;
+};
+
+export type ListCharactersParams = {
+projectId?: string;
+};
+
+export type CreateCharacterParams = {
+projectId?: string;
+};
+
+export type ListChaptersParams = {
+projectId?: string;
+};
+
+export type ListScenesParams = {
+projectId?: string;
+};
 

@@ -9,11 +9,13 @@ export const projectsTable = pgTable("narrative_projects", {
   status: text("status").notNull(),
   progress: text("progress").notNull(),
   description: text("description").notNull(),
+  isExample: text("is_example").notNull().default("false"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const charactersTable = pgTable("narrative_characters", {
   id: text("id").primaryKey(),
+  projectId: text("project_id"),
   name: text("name").notNull(),
   role: text("role").notNull(),
   initials: text("initials").notNull(),
@@ -25,6 +27,7 @@ export const charactersTable = pgTable("narrative_characters", {
 
 export const chaptersTable = pgTable("narrative_chapters", {
   id: text("id").primaryKey(),
+  projectId: text("project_id"),
   number: text("number").notNull(),
   title: text("title").notNull(),
   status: text("status").notNull(),
@@ -34,6 +37,7 @@ export const chaptersTable = pgTable("narrative_chapters", {
 
 export const scenesTable = pgTable("narrative_scenes", {
   id: text("id").primaryKey(),
+  projectId: text("project_id"),
   chapterId: text("chapter_id").notNull(),
   number: text("number").notNull(),
   title: text("title").notNull(),

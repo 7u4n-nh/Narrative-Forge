@@ -31,6 +31,11 @@ paths:
       operationId: getDashboard
       tags: [workspace]
       summary: Get the narrative workspace dashboard
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
       responses:
         "200":
           description: Dashboard overview
@@ -38,11 +43,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Dashboard"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [workspace]
+      summary: List narrative projects
+      responses:
+        "200":
+          description: Narrative projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [workspace]
+      summary: Create a narrative project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created narrative project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
   /characters:
     get:
       operationId: listCharacters
       tags: [workspace]
       summary: List project characters
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
       responses:
         "200":
           description: Character database
@@ -56,6 +97,11 @@ paths:
       operationId: createCharacter
       tags: [workspace]
       summary: Create a character
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
       requestBody:
         required: true
         content:
@@ -74,6 +120,11 @@ paths:
       operationId: listChapters
       tags: [workspace]
       summary: List story chapters
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
       responses:
         "200":
           description: Story chapters
@@ -88,6 +139,11 @@ paths:
       operationId: listScenes
       tags: [workspace]
       summary: List recent story scenes
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
       responses:
         "200":
           description: Story scenes
@@ -108,7 +164,7 @@ components:
         - status
     Project:
       type: object
-      required: [id, name, genre, status, progress, description, updatedAt]
+      required: [id, name, genre, status, progress, description, updatedAt, isExample]
       properties:
         id: { type: string }
         name: { type: string }
@@ -117,6 +173,14 @@ components:
         progress: { type: number }
         description: { type: string }
         updatedAt: { type: string }
+        isExample: { type: boolean }
+    ProjectInput:
+      type: object
+      required: [name, genre, description]
+      properties:
+        name: { type: string, minLength: 1 }
+        genre: { type: string, minLength: 1 }
+        description: { type: string }
     HealthMetric:
       type: object
       required: [label, value, color]

@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WorkspaceShell } from '@/components/workspace-shell';
+import { ProjectWorkspaceProvider } from '@/components/project-workspace';
 import {
   BiblePage,
   CharactersPage,
@@ -49,9 +50,11 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 function App() {
   return <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <Router />
-      </WouterRouter>
+      <ProjectWorkspaceProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <Router />
+        </WouterRouter>
+      </ProjectWorkspaceProvider>
       <Toaster />
     </TooltipProvider>
   </QueryClientProvider>;
