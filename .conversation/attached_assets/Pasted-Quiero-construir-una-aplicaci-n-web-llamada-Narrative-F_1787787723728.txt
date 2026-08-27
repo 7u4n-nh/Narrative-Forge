@@ -1,0 +1,1425 @@
+Quiero construir una aplicación web llamada "Narrative Forge".
+
+Narrative Forge debe ser una herramienta profesional de desarrollo narrativo para crear novelas visuales complejas.
+
+NO quiero un simple editor de texto, una aplicación de notas ni un CRUD genérico.
+
+Quiero algo conceptualmente parecido a un IDE para escritores y diseñadores narrativos: un lugar central donde pueda construir, organizar, analizar y eventualmente convertir una historia completa en una novela visual.
+
+La aplicación debe estar diseñada desde el principio para proyectos narrativos grandes y complejos.
+
+==================================================
+1. VISIÓN GENERAL
+==================================================
+
+El usuario debe poder crear un proyecto de novela visual y almacenar en él absolutamente todo lo relacionado con su universo narrativo:
+
+- Concepto general
+- Premisa
+- Tema
+- Género
+- Tono
+- Sinopsis
+- Mundo
+- Lore
+- Reglas del universo
+- Lugares
+- Personajes
+- Relaciones
+- Cronología
+- Eventos
+- Objetos importantes
+- Facciones
+- Capítulos
+- Escenas
+- Diálogos
+- Decisiones
+- Variables
+- Condiciones
+- Consecuencias
+- Rutas
+- Finales
+- Secretos
+- Información conocida por cada personaje
+- Información que todavía no conoce cada personaje
+- Estado emocional de personajes
+- Relaciones entre personajes
+- Estados del mundo
+- Cualquier otro elemento necesario para mantener la coherencia de una novela visual.
+
+La aplicación debe funcionar como una "fuente de verdad" del proyecto.
+
+La información estructurada del proyecto debe permitir posteriormente realizar análisis automáticos de coherencia.
+
+==================================================
+2. FILOSOFÍA DEL PRODUCTO
+==================================================
+
+El concepto principal es:
+
+"Write freely. Build deeply. Break nothing."
+
+El usuario debe poder escribir y diseñar libremente, mientras Narrative Forge mantiene un modelo estructurado de la historia y ayuda a detectar problemas.
+
+La aplicación debe sentirse como software profesional.
+
+Evitar completamente la apariencia de:
+
+- bloc de notas
+- formulario administrativo
+- dashboard empresarial genérico
+- plantilla CRUD
+- aplicación educativa básica.
+
+Debe sentirse como una herramienta creativa avanzada.
+
+==================================================
+3. DISEÑO VISUAL
+==================================================
+
+Crear una interfaz:
+
+- Moderna
+- Oscura
+- Elegante
+- Profesional
+- Minimalista pero potente
+- Inspirada conceptualmente en herramientas como IDEs, software creativo y herramientas de worldbuilding.
+
+Usar una jerarquía visual excelente.
+
+La interfaz debe priorizar:
+
+- legibilidad
+- navegación rápida
+- organización
+- contexto
+- reducción de carga cognitiva.
+
+Debe existir una barra lateral principal con las áreas del proyecto.
+
+El usuario debe poder navegar rápidamente entre:
+
+Dashboard
+Story Bible
+Characters
+World
+Timeline
+Story
+Flowchart
+Variables
+Narrative QA
+Settings
+
+La interfaz debe ser responsive.
+
+En escritorio debe aprovechar correctamente el espacio horizontal.
+
+En móvil debe convertirse en una navegación adaptada, sin romper la experiencia.
+
+==================================================
+4. DASHBOARD
+==================================================
+
+Crear un Dashboard del proyecto.
+
+Debe mostrar:
+
+- Nombre del proyecto
+- Género
+- Estado del proyecto
+- Progreso aproximado
+- Número de personajes
+- Número de capítulos
+- Número de escenas
+- Número de decisiones
+- Número de finales
+- Número de problemas detectados
+- Últimos elementos modificados.
+
+También debe existir una sección:
+
+"Continue working"
+
+que permita volver rápidamente a:
+
+- última escena editada
+- último personaje editado
+- último problema detectado.
+
+Agregar una pequeña sección de salud narrativa:
+
+Narrative Health
+
+Ejemplo:
+
+Overall: 87%
+
+Continuity: 92%
+Characters: 84%
+Timeline: 95%
+Branches: 79%
+World Rules: 91%
+
+Estos valores inicialmente pueden ser calculados de manera sencilla o simulados si todavía no existe el motor completo, pero la arquitectura debe permitir reemplazarlos posteriormente por análisis reales.
+
+==================================================
+5. STORY BIBLE
+==================================================
+
+Crear una sección llamada Story Bible.
+
+Debe ser el centro de conocimiento del proyecto.
+
+Debe permitir almacenar:
+
+- Premisa
+- Sinopsis
+- Tema
+- Género
+- Tono
+- Público objetivo
+- Inspiraciones
+- Reglas narrativas
+- Reglas del universo
+- Lore
+- Historia del mundo
+- Facciones
+- Lugares
+- Objetos importantes
+- Conceptos
+- Terminología.
+
+Debe existir una separación clara entre:
+
+"Canon"
+
+y
+
+"Notes / Ideas"
+
+El contenido Canon debe representar información oficial de la historia.
+
+Las Notes pueden contener ideas todavía no confirmadas.
+
+==================================================
+6. WORLD BUILDING
+==================================================
+
+Crear herramientas para construir el mundo.
+
+Entidades mínimas:
+
+Locations
+Factions
+Objects
+Events
+World Rules
+Concepts.
+
+Cada entidad debe poder tener:
+
+- Nombre
+- Descripción
+- Etiquetas
+- Estado
+- Relaciones con otras entidades
+- Notas
+- Información relevante.
+
+Ejemplo:
+
+Location:
+
+Nombre: Blackwood Mansion
+
+Descripción:
+Una mansión abandonada ubicada al norte de la ciudad.
+
+Propiedades:
+
+- ubicación
+- habitantes
+- eventos ocurridos
+- objetos presentes
+- personajes relacionados.
+
+==================================================
+7. PERSONAJES
+==================================================
+
+Esta es una de las partes MÁS IMPORTANTES de Narrative Forge.
+
+Crear un Character Database completo.
+
+Cada personaje debe poder contener:
+
+Identidad:
+- Nombre
+- Alias
+- Edad
+- Fecha de nacimiento
+- Género
+- Ocupación
+- Apariencia
+- Voz
+- Pronombres.
+
+Personalidad:
+- Rasgos principales
+- Virtudes
+- Defectos
+- Miedos
+- Deseos
+- Motivaciones
+- Valores
+- Límites morales
+- Manías
+- Hábitos
+- Forma de hablar
+- Humor
+- Temperamento.
+
+Historia:
+- Biografía
+- Pasado
+- Eventos importantes
+- Traumas
+- Relaciones familiares
+- Secretos.
+
+Narrativa:
+- Objetivo
+- Conflicto
+- Arco de personaje
+- Desarrollo
+- Estado inicial
+- Estado esperado.
+
+Relaciones:
+- Amistad
+- Amor
+- Odio
+- Confianza
+- Rivalidad
+- Familia
+- Mentor
+- Enemigo
+- etc.
+
+Knowledge:
+
+Esta parte es CRÍTICA.
+
+Cada personaje debe tener información que:
+
+- conoce
+- desconoce
+- sospecha
+- cree incorrectamente
+- descubrió
+- perdió
+- recibió de otro personaje.
+
+La aplicación debe poder utilizar esta información posteriormente para detectar errores.
+
+==================================================
+8. CHARACTER CONSISTENCY
+==================================================
+
+Narrative Forge debe poder analizar si un personaje está actuando de acuerdo con su personalidad.
+
+Ejemplo:
+
+Personaje:
+
+María
+
+Rasgos:
+- desconfiada
+- introvertida
+- evita hablar con desconocidos.
+
+Después el usuario escribe:
+
+"María se acerca al extraño y le cuenta todos los secretos de su familia."
+
+La aplicación debería poder generar:
+
+POSSIBLE CHARACTER INCONSISTENCY
+
+María está actuando de una forma que parece contradecir sus rasgos establecidos.
+
+Confidence: 91%
+
+Acciones:
+
+[Review]
+[Explain Exception]
+[Ignore]
+
+No asumir automáticamente que una contradicción es un error.
+
+El sistema debe permitir justificarla.
+
+Por ejemplo:
+
+"María confía en él porque descubre que es su hermano."
+
+Eso podría convertir el comportamiento en coherente.
+
+==================================================
+9. STORY STRUCTURE
+==================================================
+
+Crear una sección Story.
+
+Debe permitir organizar:
+
+Story
+ ├── Acts
+ │    ├── Chapters
+ │    │    ├── Scenes
+ │    │    │    ├── Dialogue
+ │    │    │    ├── Actions
+ │    │    │    ├── Choices
+ │    │    │    └── Events
+
+Cada escena debe poder contener:
+
+- título
+- descripción
+- ubicación
+- fecha/hora narrativa
+- personajes presentes
+- texto narrativo
+- diálogos
+- acciones
+- eventos
+- decisiones
+- consecuencias
+- variables modificadas
+- información revelada.
+
+==================================================
+10. SCENE EDITOR
+==================================================
+
+Crear un editor de escenas cómodo y profesional.
+
+Debe permitir escribir:
+
+Narración
+
+Diálogo
+
+Acciones
+
+Pensamientos
+
+Eventos
+
+Decisiones.
+
+Cada elemento debe estar claramente diferenciado visualmente.
+
+Ejemplo:
+
+NARRATION
+
+La lluvia golpeaba las ventanas.
+
+MARÍA
+
+—No deberías haber venido.
+
+JUAN
+
+—Tenía que hacerlo.
+
+ACTION
+
+María se aleja de la ventana.
+
+CHOICE
+
+¿Qué hace Juan?
+
+[Decir la verdad]
+[Mentir]
+[Irse]
+
+El editor debe permitir reorganizar estos elementos.
+
+==================================================
+11. DECISION SYSTEM
+==================================================
+
+Crear un sistema para decisiones narrativas.
+
+Cada Choice puede tener:
+
+- texto
+- condiciones
+- consecuencias
+- variables modificadas
+- relación modificada
+- información desbloqueada
+- eventos activados
+- escenas siguientes.
+
+Ejemplo:
+
+Choice:
+
+"Decir la verdad"
+
+Condition:
+
+trust_maria >= 50
+
+Effects:
+
+trust_maria +10
+
+knowledge_maria_about_secret = true
+
+Next Scene:
+
+Chapter 3 / Scene 8
+
+==================================================
+12. VARIABLES
+==================================================
+
+Crear un sistema de variables.
+
+Tipos mínimos:
+
+- número
+- boolean
+- texto
+- relación
+- estado.
+
+Ejemplos:
+
+trust_maria = 72
+
+juan_knows_secret = true
+
+chapter = 4
+
+maria_relationship = "friend"
+
+Variables deben poder utilizarse en:
+
+- decisiones
+- escenas
+- diálogos
+- eventos
+- finales.
+
+==================================================
+13. RELATIONSHIPS
+==================================================
+
+Crear un sistema visual de relaciones entre personajes.
+
+Cada relación puede contener:
+
+- tipo
+- intensidad
+- confianza
+- afecto
+- hostilidad
+- historia
+- eventos relevantes.
+
+Ejemplo:
+
+Juan → María
+
+Relationship: Friendship
+
+Trust: 72
+
+Affection: 48
+
+Conflict: 15
+
+Mostrar conexiones visualmente cuando sea posible.
+
+==================================================
+14. TIMELINE
+==================================================
+
+Crear una Timeline narrativa.
+
+Debe permitir ordenar eventos cronológicamente.
+
+Cada evento debe poder tener:
+
+- fecha
+- hora
+- ubicación
+- personajes involucrados
+- descripción
+- consecuencias.
+
+El sistema debe poder detectar posteriormente:
+
+Eventos imposibles.
+
+Ejemplo:
+
+Scene 15:
+"Juan llega a Madrid."
+
+Scene 18:
+"Juan lleva tres semanas viviendo en Madrid."
+
+Scene 16:
+"Juan llega por primera vez a Madrid."
+
+Narrative QA debería detectar el conflicto.
+
+==================================================
+15. KNOWLEDGE GRAPH
+==================================================
+
+Crear una estructura preparada para representar relaciones entre entidades.
+
+Por ejemplo:
+
+Juan
+↓ knows
+Secret X
+
+María
+↓ doesn't know
+Secret X
+
+Carlos
+↓ suspects
+Secret X
+
+Esto será utilizado posteriormente por Narrative QA.
+
+==================================================
+16. STORY FLOWCHART
+==================================================
+
+Crear un Flowchart visual de la historia.
+
+Debe mostrar:
+
+Scenes
+Choices
+Branches
+Conditions
+Endings.
+
+Ejemplo:
+
+Scene 1
+   ↓
+Scene 2
+   ↓
+Choice
+ ↙    ↘
+A      B
+↓      ↓
+3A     3B
+ ↓      ↓
+Ending A Ending B
+
+Permitir zoom y navegación.
+
+El flowchart debe ser visualmente limpio.
+
+==================================================
+17. ENDINGS
+==================================================
+
+Crear sistema de finales.
+
+Cada final debe poder tener:
+
+- nombre
+- descripción
+- condiciones
+- escenas necesarias
+- variables necesarias
+- decisiones necesarias
+- personajes vivos/muertos
+- relaciones mínimas
+- secretos descubiertos.
+
+Narrative Forge debe poder detectar:
+
+- finales imposibles
+- finales nunca alcanzables
+- finales sin condiciones
+- ramas que nunca llevan a un final.
+
+==================================================
+18. NARRATIVE QA
+==================================================
+
+Esta es la característica estrella.
+
+Crear una sección llamada:
+
+"Narrative QA"
+
+Debe funcionar como un sistema de control de calidad narrativo.
+
+No quiero solamente un chatbot.
+
+Quiero análisis estructurado del proyecto.
+
+Categorías:
+
+CONTINUITY
+
+TIMELINE
+
+CHARACTER CONSISTENCY
+
+KNOWLEDGE
+
+WORLD RULES
+
+RELATIONSHIPS
+
+OBJECTS
+
+LOCATIONS
+
+DIALOGUE
+
+CHOICES
+
+VARIABLES
+
+BRANCHES
+
+ENDINGS
+
+CANON.
+
+Cada problema debe tener:
+
+- ID
+- categoría
+- severidad
+- título
+- descripción
+- elementos involucrados
+- evidencia
+- confianza
+- estado.
+
+Severidades:
+
+INFO
+LOW
+MEDIUM
+HIGH
+CRITICAL.
+
+Estados:
+
+OPEN
+RESOLVED
+IGNORED
+JUSTIFIED.
+
+==================================================
+19. NARRATIVE QA EXAMPLES
+==================================================
+
+Ejemplo 1:
+
+CRITICAL
+
+Character Knowledge Conflict
+
+"María knows that Carlos is the murderer."
+
+Pero según la historia:
+
+María todavía no recibió esa información.
+
+--------------------------------
+
+Ejemplo 2:
+
+HIGH
+
+Timeline Conflict
+
+"Juan arrives in Tokyo on June 14."
+
+Pero otra escena establece que Juan está en París el June 14.
+
+--------------------------------
+
+Ejemplo 3:
+
+MEDIUM
+
+Character Consistency
+
+"María reveals a deeply personal secret to a stranger."
+
+Esto parece entrar en conflicto con su personalidad establecida.
+
+--------------------------------
+
+Ejemplo 4:
+
+HIGH
+
+World Rule Violation
+
+"Dead characters cannot return."
+
+Pero Carlos aparece vivo sin explicación.
+
+--------------------------------
+
+Ejemplo 5:
+
+HIGH
+
+Unreachable Branch
+
+Esta decisión requiere:
+
+trust_maria >= 80
+
+Pero el máximo posible de trust_maria en todas las rutas es 65.
+
+--------------------------------
+
+Ejemplo 6:
+
+CRITICAL
+
+Dead End
+
+Esta rama no conduce a ninguna escena ni final.
+
+==================================================
+20. AI ARCHITECTURE
+==================================================
+
+La IA debe utilizar el contexto estructurado del proyecto.
+
+NO enviar indiscriminadamente todo el proyecto a un modelo en cada análisis.
+
+Diseñar la arquitectura de manera modular.
+
+Debe existir una separación entre:
+
+Project Data
+
+Narrative Knowledge
+
+Rules
+
+Analysis Engine
+
+AI Analysis
+
+QA Issues.
+
+Primero intentar detectar problemas mediante reglas deterministas cuando sea posible.
+
+Después utilizar IA para problemas semánticos.
+
+Ejemplo:
+
+Timeline conflict:
+
+Puede detectarse mediante lógica.
+
+Character personality inconsistency:
+
+Puede requerir IA.
+
+Esto debe reducir costos y falsos positivos.
+
+==================================================
+21. AI EXPLANATIONS
+==================================================
+
+Cuando la IA detecte algo:
+
+NO decir simplemente:
+
+"Esto está mal."
+
+Debe explicar:
+
+Qué detectó.
+
+Por qué puede ser un problema.
+
+Qué información del proyecto utilizó.
+
+Qué escenas están involucradas.
+
+Qué tan segura está.
+
+Ejemplo:
+
+"Possible inconsistency detected."
+
+"Maria is described as highly distrustful of strangers."
+
+"In Scene 14 she reveals her family's biggest secret to an unknown person."
+
+"Confidence: 88%"
+
+"However, no established event explains why Maria would trust this person."
+
+==================================================
+22. HUMAN OVERRIDE
+==================================================
+
+El escritor siempre tiene la última palabra.
+
+La IA puede estar equivocada.
+
+Por eso cada problema debe permitir:
+
+Resolve
+
+Ignore
+
+Justify
+
+Dismiss.
+
+"Justify" debe permitir explicar por qué algo aparentemente contradictorio es intencional.
+
+La justificación debe quedar almacenada como parte del proyecto.
+
+==================================================
+23. SEARCH
+==================================================
+
+Crear búsqueda global.
+
+Debe poder buscar:
+
+- personajes
+- escenas
+- capítulos
+- lugares
+- objetos
+- eventos
+- variables
+- reglas
+- problemas QA
+- diálogos.
+
+La búsqueda debe ser rápida.
+
+==================================================
+24. TAGGING
+==================================================
+
+Permitir etiquetas.
+
+Ejemplos:
+
+#main-character
+#romance
+#mystery
+#foreshadowing
+#secret
+#important
+#flashback
+
+Las etiquetas deben poder utilizarse para filtrar contenido.
+
+==================================================
+25. FORESHADOWING
+==================================================
+
+Preparar soporte para elementos de foreshadowing.
+
+Ejemplo:
+
+Foreshadowing:
+
+"The broken clock"
+
+Introduced:
+Chapter 1
+
+Payoff:
+Chapter 8
+
+Status:
+Unresolved.
+
+Narrative QA podría advertir:
+
+"Foreshadowing element has not received a payoff."
+
+==================================================
+26. SECRETS
+==================================================
+
+Crear sistema de secretos.
+
+Un secreto debe poder tener:
+
+- contenido
+- dueño
+- personajes que lo conocen
+- personajes que sospechan
+- personajes que lo desconocen
+- cuándo fue revelado
+- cómo fue revelado.
+
+Esto debe integrarse con Character Knowledge.
+
+==================================================
+27. VERSION HISTORY
+==================================================
+
+Preparar arquitectura para versionado.
+
+El usuario debe poder guardar estados del proyecto.
+
+Ejemplo:
+
+Version 0.1
+Version 0.2
+Version 0.3
+
+Idealmente poder recuperar versiones anteriores posteriormente.
+
+No es obligatorio implementar un sistema Git completo en la primera versión, pero la arquitectura debe permitirlo.
+
+==================================================
+28. AUTOSAVE
+==================================================
+
+El usuario nunca debería perder trabajo.
+
+Implementar guardado automático.
+
+Mostrar:
+
+Saved
+
+Saving...
+
+Unsaved changes
+
+==================================================
+29. PROJECT DATA
+==================================================
+
+Diseñar una estructura de datos clara.
+
+Las entidades deben estar relacionadas.
+
+Por ejemplo:
+
+Character
+Scene
+Knowledge
+Relationship
+Event
+Variable
+Choice
+Ending
+
+no deben existir como elementos completamente aislados.
+
+La arquitectura debe permitir referencias cruzadas.
+
+==================================================
+30. SEED PROJECT
+==================================================
+
+Crear un proyecto de demostración incluido.
+
+Debe tener:
+
+- varios personajes
+- una pequeña historia
+- algunas escenas
+- una decisión
+- variables
+- una relación
+- un secreto
+- una contradicción intencional.
+
+Esto permitirá demostrar Narrative QA.
+
+Por ejemplo:
+
+Character:
+Elena
+
+Personality:
+Trust issues
+
+Secret:
+She caused the accident.
+
+Knowledge:
+Only Daniel knows the truth.
+
+Luego crear una escena donde Elena accidentalmente actúe de manera sospechosa.
+
+El sistema debería mostrar ejemplos de análisis.
+
+==================================================
+31. EMPTY STATE
+==================================================
+
+Cuando el usuario cree un proyecto nuevo sin datos, la aplicación debe mostrar estados vacíos atractivos.
+
+No mostrar simplemente:
+
+"No data."
+
+Mostrar mensajes útiles:
+
+"Your story begins here."
+
+"Create your first character."
+
+"Define the rules of your world."
+
+"Write your first scene."
+
+==================================================
+32. ARCHITECTURE
+==================================================
+
+Priorizar una arquitectura mantenible y escalable.
+
+Separar claramente:
+
+UI
+
+Data
+
+Domain Logic
+
+Narrative Engine
+
+QA Engine
+
+AI Services.
+
+Evitar una aplicación monolítica.
+
+Utilizar componentes reutilizables.
+
+Preparar el proyecto para incorporar autenticación, base de datos y servicios de IA posteriormente.
+
+==================================================
+33. SECURITY
+==================================================
+
+No almacenar secretos directamente en el frontend.
+
+Las API keys deben manejarse mediante variables de entorno.
+
+Nunca exponer claves privadas al navegador.
+
+Validar entradas.
+
+==================================================
+34. PERFORMANCE
+==================================================
+
+La aplicación debe funcionar bien incluso cuando el proyecto tenga:
+
+cientos de personajes
+
+miles de escenas
+
+miles de relaciones
+
+miles de elementos de lore.
+
+No renderizar innecesariamente todo el proyecto al mismo tiempo.
+
+Preparar la interfaz para virtualización y carga progresiva cuando sea necesario.
+
+==================================================
+35. RESPONSIVE
+==================================================
+
+Desktop:
+
+Sidebar + main workspace.
+
+Tablet:
+
+Sidebar adaptable.
+
+Mobile:
+
+Navigation drawer / bottom navigation cuando sea apropiado.
+
+El editor debe seguir siendo usable en móvil.
+
+==================================================
+36. UX PRINCIPLES
+==================================================
+
+El usuario debe poder llegar a cualquier parte del proyecto rápidamente.
+
+Evitar formularios interminables.
+
+Usar:
+
+tabs
+
+accordions
+
+panels
+
+modals
+
+context menus
+
+command palette cuando sea apropiado.
+
+Agregar atajos de teclado posteriormente.
+
+==================================================
+37. COMMAND PALETTE
+==================================================
+
+Preparar una Command Palette.
+
+Ejemplo:
+
+Ctrl + K
+
+Acciones:
+
+Open Character
+
+Create Scene
+
+Search
+
+Go to Timeline
+
+Run Narrative QA
+
+Create Choice
+
+Open Story Bible.
+
+==================================================
+38. NARRATIVE HEALTH
+==================================================
+
+Crear un sistema de puntuación narrativa.
+
+NO debe pretender ser una medida objetiva de la calidad literaria.
+
+Debe representar únicamente la salud estructural del proyecto.
+
+Métricas:
+
+Continuity
+Timeline
+Character consistency
+Knowledge consistency
+World rules
+Branch integrity
+Ending reachability.
+
+Mostrarlo claramente como:
+
+"Structural Health"
+
+y no como una puntuación de calidad artística.
+
+==================================================
+39. FUTURE EXPORT
+==================================================
+
+Diseñar la arquitectura pensando en exportar posteriormente a:
+
+Ren'Py
+
+Web
+
+JSON
+
+Markdown
+
+Potentially Godot/Unity.
+
+No es necesario implementar todos estos exportadores ahora.
+
+Pero los datos deben estar suficientemente estructurados para permitirlo.
+
+==================================================
+40. IMPORTANT DEVELOPMENT RULE
+==================================================
+
+NO intentes implementar absolutamente todas las características de esta especificación en una sola iteración si eso produce una aplicación frágil.
+
+Primero construye una base excelente.
+
+Orden recomendado:
+
+PHASE 1
+
+- Shell de aplicación
+- Dashboard
+- navegación
+- proyectos
+- Story Bible básica
+- personajes
+- escenas
+- persistencia.
+
+PHASE 2
+
+- Story structure
+- Choices
+- Variables
+- Relationships
+- Timeline.
+
+PHASE 3
+
+- Flowchart
+- Knowledge graph
+- Secrets
+- Endings.
+
+PHASE 4
+
+- Narrative QA determinista.
+
+PHASE 5
+
+- AI Narrative QA.
+
+PHASE 6
+
+- Exportación.
+
+En cada fase:
+
+- verificar que la aplicación funciona
+- corregir errores
+- evitar romper funcionalidades existentes
+- mantener la arquitectura limpia.
+
+==================================================
+41. IMPORTANT AI BEHAVIOR
+==================================================
+
+No quiero una IA que invente información del proyecto.
+
+La IA debe diferenciar claramente entre:
+
+Established Fact
+
+Inference
+
+Possible Problem
+
+Suggestion.
+
+Nunca convertir una inferencia en canon automáticamente.
+
+La IA debe decir:
+
+"Possible inconsistency"
+
+cuando no esté segura.
+
+==================================================
+42. PRODUCT FEEL
+==================================================
+
+Narrative Forge debe sentirse como:
+
+"El lugar donde una historia complicada finalmente deja de ser un caos."
+
+Debe ayudar a un escritor que tiene cientos de ideas y detalles a mantenerlos organizados.
+
+Debe permitir que una novela visual enorme pueda crecer sin que el autor pierda el control de:
+
+personajes
+
+lore
+
+continuidad
+
+decisiones
+
+ramas
+
+cronología
+
+secretos
+
+variables.
+
+==================================================
+43. FIRST DELIVERY
+==================================================
+
+Ahora NO quiero una explicación teórica.
+
+Quiero que construyas la primera versión funcional de Narrative Forge.
+
+Primero analiza la especificación completa.
+
+Después:
+
+1. Diseña la arquitectura.
+2. Construye la interfaz principal.
+3. Implementa navegación.
+4. Implementa almacenamiento persistente.
+5. Implementa Dashboard.
+6. Implementa Story Bible.
+7. Implementa Character Database.
+8. Implementa Story/Scene Editor básico.
+9. Implementa un proyecto de demostración.
+10. Verifica que todo funcione.
+11. Corrige errores.
+12. Deja la aplicación en un estado funcional y elegante.
+
+No sacrifiques estabilidad por intentar implementar todo.
+
+La calidad de la experiencia es más importante que la cantidad de botones.
+
+Si alguna característica avanzada todavía no puede implementarse correctamente, crea la arquitectura y una interfaz preparada para ella en lugar de inventar una implementación frágil.
+
+Antes de terminar, prueba todos los flujos principales y asegúrate de que la aplicación arranca correctamente.
+
+El resultado debe sentirse como el comienzo de un producto real, no como un prototipo desechable.
+
+Nombre del producto:
+
+NARRATIVE FORGE
+
+Tagline:
+
+"Build worlds. Shape stories. Break nothing."

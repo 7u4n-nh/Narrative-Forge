@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Narrative Forge"
+description = "A professional narrative development workspace for building complex visual novels. Organize story canon, characters, worldbuilding, timelines, branching scenes, variables, and narrative quality checks in one focused creative environment."
+version = "1.0.0"
+id = "artifacts/narrative-forge"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22249
+
+[services.development]
+run = "pnpm --filter @workspace/narrative-forge run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/narrative-forge", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/narrative-forge/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22249"
+BASE_PATH = "/"

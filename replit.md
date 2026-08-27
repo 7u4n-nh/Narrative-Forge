@@ -1,6 +1,6 @@
-# [Project name]
+# Narrative Forge
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Narrative Forge is a professional narrative development workspace for building complex visual novels.
 
 ## Run & Operate
 
@@ -22,15 +22,24 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/narrative-forge/src/` — responsive workspace shell and narrative tool pages
+- `artifacts/api-server/src/routes/narrative.ts` — dashboard, character, chapter, and scene API
+- `lib/db/src/schema/narrative.ts` — PostgreSQL source-of-truth for narrative records
+- `lib/api-spec/openapi.yaml` — source-of-truth for generated API hooks and schemas
+- `artifacts/narrative-forge/src/index.css` — Narrative Forge theme tokens and workspace utilities
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The first vertical slice uses the shared API server and PostgreSQL so dashboard reads and character creation persist across reloads.
+- The UI uses generated React Query hooks from the OpenAPI contract rather than hand-written fetch clients.
+- Seeded story data makes the workspace immediately explorable while the rest of the narrative model expands.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Explore project health, progress, stats, and recent activity from the workspace dashboard.
+- Search and filter a character database, inspect dossiers, and add new characters.
+- Review chapters, scenes, chronology, and story flow.
+- Navigate to worldbuilding, canon, variables, QA, and project settings surfaces.
 
 ## User preferences
 

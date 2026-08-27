@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
+export interface Chapter {
+  id: string;
+  number: number;
+  title: string;
   status: string;
+  sceneCount: number;
+  summary: string;
 }

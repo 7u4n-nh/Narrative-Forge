@@ -1,0 +1,1 @@
+- [Narrative API contract generation](narrative-api-contract.md) — use numeric OpenAPI fields until the workspace Zod generator/runtime supports integer output together.
