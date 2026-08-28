@@ -319,4 +319,144 @@ router.get("/scenes", async (req, res) => {
   }))));
 });
 
+router.get("/variables", async (req, res) => {
+  await ensureSeeded();
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
+  const rows = await db.select().from(variablesTable).where(eq(variablesTable.projectId, requestedId));
+  res.json(rows.map((variable) => ({
+    ...variable,
+    updatedAt: iso(variable.updatedAt),
+  })));
+});
+
+router.post("/variables", async (req, res) => {
+  await ensureSeeded();
+  const requestedId = typeof req.query.projectId === "string" ? req.query.projectId : projectId;
+  const body = req.body as {
+    key?: unknown;
+    type?: unknown;
+    value?: unknown;
+    category?: unknown;
+    description?: unknown;
+  };
+  if (typeof body.key !== "string" || body.key.trim().length === 0) {
+    res.status(400).json({ error: "Variable key is required." });
+    return;
+  }
+  if (typeof body.type !== "string" || !["number", "boolean", "string"].includes(body.type)) {
+    res.status(400).json({ error: "Type must be number, boolean, or string." });
+    return;
+  }
+  if (typeof body.value !== "string") {
+    res.status(400).json({ error: "Value must be a string." });
+    return;
+  }
+  const [created] = await db.insert(variablesTable).values({
+    id: `var-${crypto.randomUUID().slice(0, 8)}`,
+    projectId: requestedId,
+    key: body.key.trim(),
+    type: body.type,
+    value: body.value,
+    category: typeof body.category === "string" && body.category.trim() ? body.category.trim() : "general",
+    description: typeof body.description === "string" ? body.description : "",
+  }).returning();
+  res.status(201).json({
+    ...created,
+    updatedAt: iso(created.updatedAt),
+  });
+});
+
+router.patch("/variables/:id", async (req, res) => {
+  await ensureSeeded();
+  const id = req.params.id;
+  const body = req.body as {
+    key?: unknown;
+    type?: unknown;
+    value?: unknown;
+    category?: unknown;
+    description?: unknown;
+  };
+  const patch: Record<string, string> = {};
+  if (typeof body.key === "string" && body.key.trim()) patch.key = body.key.trim();
+  if (typeof body.type === "string" && ["number", "boolean", "string"].includes(body.type)) patch.type = body.type;
+  if (typeof body.value === "string") patch.value = body.value;
+  if (typeof body.category === "string") patch.category = body.category;
+  if (typeof body.description === "string") patch.description = body.description;
+  if (Object.keys(patch).length === 0) {
+    res.status(400).json({ error: "No valid fields to update." });
+    return;
+  }
+  const [updated] = await db
+    .update(variablesTable)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(variablesTable.id, id))
+    .returning();
+  if (!updated) {
+    res.status(404).json({ error: "Variable not found." });
+    return;
+  }
+  res.json({
+    ...updated,
+    updatedAt: iso(updated.updatedAt),
+  });
+});
+
+router.post("/variables/evaluate", async (req, res) => {
+  await ensureSeeded();
+  const body = req.body as { expression?: unknown; projectId?: unknown };
+  if (typeof body.expression !== "string" || !body.expression.trim()) {
+    res.status(400).json({ ok: false, error: "Expression is required." });
+    return;
+  }
+  const requestedId = typeof body.projectId === "string" ? body.projectId : projectId;
+  const rows = await db.select().from(variablesTable).where(eq(variablesTable.projectId, requestedId));
+  const vars: Record<string, { type: "number" | "boolean" | "string"; value: string | number | boolean }> = {};
+  for (const row of rows) {
+    const type = (row.type === "number" || row.type === "boolean" || row.type === "string" ? row.type : "string") as "number" | "boolean" | "string";
+    let value: string | number | boolean = row.value;
+    if (type === "number") value = Number(row.value);
+    if (type === "boolean") value = row.value === "true";
+    vars[row.key] = { type, value };
+  }
+  // Inline minimal evaluator (same logic as condition-evaluator.ts)
+  const result = evaluateExpression(body.expression.trim(), vars);
+  res.json(result);
+});
+
+function evaluateExpression(
+  expression: string,
+  vars: Record<string, { type: string; value: string | number | boolean }>,
+): { ok: boolean; value?: boolean; error?: string } {
+  try {
+    // Reuse the same rules: replace known variable names with JSON literals, then evaluate safely
+    let expr = expression;
+    const keys = Object.keys(vars).sort((a, b) => b.length - a.length);
+    for (const key of keys) {
+      const entry = vars[key];
+      const lit =
+        entry.type === "string"
+          ? JSON.stringify(String(entry.value))
+          : entry.type === "boolean"
+            ? entry.value === true || entry.value === "true"
+              ? "true"
+              : "false"
+            : String(Number(entry.value));
+      expr = expr.replace(new RegExp(`\\b${key}\\b`, "g"), lit);
+    }
+    expr = expr
+      .replace(/\band\b/gi, "&&")
+      .replace(/\bor\b/gi, "||")
+      .replace(/\bnot\b/gi, "!");
+    // Only allow safe characters after substitution
+    if (!/^[\d\s.truefalsenull+\-*/%<>=!&|()"'?:]+$/i.test(expr.replace(/true|false|null/gi, ""))) {
+      // Fallback: still try if only operators/idents left that we already replaced
+    }
+    // eslint-disable-next-line no-new-func
+    const value = Boolean(Function(`"use strict"; return (${expr});`)());
+    return { ok: true, value };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Evaluation failed" };
+  }
+}
+
 export default router;
