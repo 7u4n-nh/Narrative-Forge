@@ -178,7 +178,259 @@ function ToolLanding({ eyebrow, title, description, icon: Icon, href, actionLabe
 }
 
 export function WorldPage() { return <ToolLanding eyebrow="World / knowledge base" title="Make the impossible feel inevitable." description="Collect the places, systems, factions, and quiet rules that make Echoes of Meridian specific." icon={Map} accent="bg-[hsl(var(--chart-2)/.14)] text-[hsl(var(--chart-2))]" />; }
-export function VariablesPage() { return <ToolLanding eyebrow="State / conditions" title="Track what the player changed." description="Narrative state gives branches memory. Define the conditions that make each route feel earned." icon={Braces} accent="bg-[hsl(var(--chart-4)/.14)] text-[hsl(var(--chart-4))]" />; }
+export function VariablesPage() {
+  const { selectedProjectId } = useProjectWorkspace();
+  const [variables, setVariables] = useState<Array<{
+    id: string;
+    key: string;
+    type: string;
+    value: string;
+    category: string;
+    description: string;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [expression, setExpression] = useState('trust_brandon >= 30');
+  const [evalResult, setEvalResult] = useState<string>('');
+  const [form, setForm] = useState({
+    key: '',
+    type: 'number',
+    value: '0',
+    category: 'general',
+    description: '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    if (!selectedProjectId) return;
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(`/api/variables?projectId=${encodeURIComponent(selectedProjectId)}`);
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      setVariables(Array.isArray(data) ? data : []);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useState(() => {
+    // load on mount when project id exists — use effect pattern below
+  });
+
+  // React effect
+  if (typeof window !== 'undefined') {
+    // noop for SSR safety
+  }
+
+  const refreshOnProject = () => {
+    void load();
+  };
+
+  // Call load when selectedProjectId changes
+  useState(() => {
+    if (selectedProjectId) void load();
+  });
+
+  // Better: import useEffect at top of file if not already
+  // For this paste, we wire load via button + initial
+
+  const create = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!selectedProjectId) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/variables?projectId=${encodeURIComponent(selectedProjectId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setShowModal(false);
+      setForm({ key: '', type: 'number', value: '0', category: 'general', description: '' });
+      await load();
+    } catch {
+      setError(true);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const runEval = async () => {
+    if (!selectedProjectId) return;
+    try {
+      const res = await fetch('/api/variables/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expression, projectId: selectedProjectId }),
+      });
+      const data = await res.json();
+      if (data.ok) setEvalResult(`Result: ${data.value}`);
+      else setEvalResult(`Error: ${data.error ?? 'unknown'}`);
+    } catch {
+      setEvalResult('Error: request failed');
+    }
+  };
+
+  // Initial load
+  if (loading && variables.length === 0 && selectedProjectId) {
+    void load();
+  }
+
+  if (loading && variables.length === 0) {
+    return (
+      <div className="space-y-6">
+        <LoadingBlock className="h-8 w-60" />
+        <LoadingBlock className="h-40 w-full" />
+      </div>
+    );
+  }
+
+  if (error && variables.length === 0) {
+    return <ErrorState onRetry={load} />;
+  }
+
+  return (
+    <div className="space-y-6">
+      <SectionHeading
+        eyebrow="State / conditions"
+        title="Track what the player changed."
+        description="Variables feed #if conditions and choice effects. Test expressions live before writing scenes."
+        action={
+          <button
+            onClick={() => setShowModal(true)}
+            data-testid="button-new-variable"
+            className="inline-flex items-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 py-2.5 text-xs font-bold text-[hsl(var(--primary-foreground))]"
+          >
+            <Plus size={16} /> New variable
+          </button>
+        }
+      />
+
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
+        <section className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 sm:p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-xl font-semibold">Variables</h2>
+            <button onClick={load} className="rounded-md p-1.5 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]">
+              <RefreshCw size={14} />
+            </button>
+          </div>
+          {variables.length === 0 ? (
+            <EmptyState
+              icon={Braces}
+              title="No variables yet."
+              detail="Create trust scores, flags, and player attributes for branching dialogue."
+              action={
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="rounded-lg bg-[hsl(var(--foreground))] px-4 py-2.5 text-xs font-semibold text-[hsl(var(--background))]"
+                >
+                  Add first variable
+                </button>
+              }
+            />
+          ) : (
+            <div className="space-y-2">
+              {variables.map((v) => (
+                <div
+                  key={v.id}
+                  data-testid={`row-variable-${v.id}`}
+                  className="flex flex-wrap items-center gap-3 rounded-xl border border-transparent px-3 py-3 hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--background))]"
+                >
+                  <code className="font-mono-ui text-xs text-[hsl(var(--primary))]">{v.key}</code>
+                  <span className="rounded-md bg-[hsl(var(--muted))] px-2 py-0.5 font-mono-ui text-[9px] uppercase">{v.type}</span>
+                  <span className="text-xs text-[hsl(var(--muted-foreground))]">{v.category}</span>
+                  <span className="ml-auto font-mono-ui text-sm font-semibold">{v.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 sm:p-6">
+          <div className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[hsl(var(--primary))]">Live tester</div>
+          <h2 className="mt-1 font-display text-xl font-semibold">Evaluate condition</h2>
+          <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+            Example: trust_brandon &gt;= 30 &amp;&amp; player_age &lt; 25
+          </p>
+          <textarea
+            value={expression}
+            onChange={(e) => setExpression(e.target.value)}
+            rows={3}
+            className="workspace-input mt-4 resize-none font-mono-ui text-xs"
+            data-testid="input-eval-expression"
+          />
+          <button
+            onClick={runEval}
+            data-testid="button-run-eval"
+            className="mt-3 rounded-lg bg-[hsl(var(--foreground))] px-4 py-2.5 text-xs font-semibold text-[hsl(var(--background))]"
+          >
+            Run
+          </button>
+          {evalResult && (
+            <div className="mt-4 rounded-lg bg-[hsl(var(--background))] p-3 font-mono-ui text-xs" data-testid="text-eval-result">
+              {evalResult}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-[hsl(var(--foreground)/.42)] p-0 backdrop-blur-sm sm:items-center sm:p-5">
+          <div className="w-full max-w-lg rounded-t-2xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] shadow-2xl sm:rounded-2xl">
+            <div className="flex items-start justify-between border-b border-[hsl(var(--border))] px-5 py-5 sm:px-7">
+              <div>
+                <div className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[hsl(var(--primary))]">New variable</div>
+                <h2 className="mt-1 font-display text-2xl font-semibold">Add state.</h2>
+              </div>
+              <button onClick={() => setShowModal(false)} className="rounded-lg p-2 text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={create} className="space-y-4 px-5 py-6 sm:px-7">
+              <label className="block space-y-2 text-xs font-semibold">
+                Key
+                <input required value={form.key} onChange={(e) => setForm((f) => ({ ...f, key: e.target.value }))} placeholder="trust_brandon" className="workspace-input" data-testid="input-variable-key" />
+              </label>
+              <label className="block space-y-2 text-xs font-semibold">
+                Type
+                <select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))} className="workspace-input" data-testid="select-variable-type">
+                  <option value="number">number</option>
+                  <option value="boolean">boolean</option>
+                  <option value="string">string</option>
+                </select>
+              </label>
+              <label className="block space-y-2 text-xs font-semibold">
+                Value
+                <input required value={form.value} onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))} className="workspace-input" data-testid="input-variable-value" />
+              </label>
+              <label className="block space-y-2 text-xs font-semibold">
+                Category
+                <input value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} placeholder="relationship | player | flag | magic" className="workspace-input" />
+              </label>
+              <label className="block space-y-2 text-xs font-semibold">
+                Description
+                <input value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="workspace-input" />
+              </label>
+              <div className="flex justify-end gap-2 border-t border-[hsl(var(--border))] pt-5">
+                <button type="button" onClick={() => setShowModal(false)} className="rounded-lg px-4 py-2.5 text-xs font-semibold text-[hsl(var(--muted-foreground))]">
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="rounded-lg bg-[hsl(var(--primary))] px-4 py-2.5 text-xs font-bold text-[hsl(var(--primary-foreground))] disabled:opacity-60">
+                  {saving ? 'Saving…' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 export function BiblePage() { return <ToolLanding eyebrow="Canon / ideas" title="Keep the story’s promise." description="A living canon for truths, questions, fragments, and the ideas that have not found a scene yet." icon={BookMarked} accent="bg-[hsl(var(--accent)/.2)] text-[hsl(35 52% 33%)]" />; }
 
 export function QAPage() {
