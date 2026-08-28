@@ -6,6 +6,7 @@ import {
   charactersTable,
   chaptersTable,
   scenesTable,
+  variablesTable,
 } from "@workspace/db";
 import {
   CreateCharacterBody,
