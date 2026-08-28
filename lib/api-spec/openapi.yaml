@@ -153,6 +153,88 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Scene"
+/variables:
+    get:
+      operationId: listVariables
+      tags: [workspace]
+      summary: List project variables
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Narrative variables
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Variable"
+    post:
+      operationId: createVariable
+      tags: [workspace]
+      summary: Create a narrative variable
+      parameters:
+        - in: query
+          name: projectId
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VariableInput"
+      responses:
+        "201":
+          description: Created variable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Variable"
+  /variables/{id}:
+    patch:
+      operationId: updateVariable
+      tags: [workspace]
+      summary: Update a narrative variable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VariableUpdate"
+      responses:
+        "200":
+          description: Updated variable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Variable"
+  /variables/evaluate:
+    post:
+      operationId: evaluateCondition
+      tags: [workspace]
+      summary: Evaluate a condition expression against project variables
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluateInput"
+      responses:
+        "200":
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluateResult"
 components:
   schemas:
     HealthStatus:
@@ -271,4 +353,45 @@ components:
         status: { type: string }
         updatedAt: { type: string }
         preview: { type: string }
-
+    Variable:
+      type: object
+      required: [id, projectId, key, type, value, category, description, updatedAt]
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        key: { type: string }
+        type: { type: string }
+        value: { type: string }
+        category: { type: string }
+        description: { type: string }
+        updatedAt: { type: string }
+    VariableInput:
+      type: object
+      required: [key, type, value]
+      properties:
+        key: { type: string, minLength: 1 }
+        type: { type: string, minLength: 1 }
+        value: { type: string }
+        category: { type: string }
+        description: { type: string }
+    VariableUpdate:
+      type: object
+      properties:
+        key: { type: string }
+        type: { type: string }
+        value: { type: string }
+        category: { type: string }
+        description: { type: string }
+    EvaluateInput:
+      type: object
+      required: [expression]
+      properties:
+        expression: { type: string, minLength: 1 }
+        projectId: { type: string }
+    EvaluateResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        value: { type: boolean }
+        error: { type: string }
